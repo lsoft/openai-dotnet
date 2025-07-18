@@ -19,7 +19,7 @@ public partial class ChatToolCall
     [CodeGenMember("Function")]
     internal InternalChatCompletionMessageToolCallFunction Function { get; set; }
 
-    // CUSTOM: Renamed.
+    // CUSTOM: Public type applied..
     /// <summary> The kind of tool call. </summary>
     [CodeGenMember("Type")]
     public ChatToolCallKind Kind { get; } = ChatToolCallKind.Function;
@@ -50,7 +50,7 @@ public partial class ChatToolCall
     /// <exception cref="ArgumentException"> <paramref name="id"/> or <paramref name="functionName"/> is an empty string, and was expected to be non-empty. </exception>
     public static ChatToolCall CreateFunctionToolCall(string id, string functionName, BinaryData functionArguments)
     {
-        Argument.AssertNotNullOrEmpty(id, nameof(id));
+        Argument.AssertNotNull(id, nameof(id));
         Argument.AssertNotNullOrEmpty(functionName, nameof(functionName));
         Argument.AssertNotNull(functionArguments, nameof(functionArguments));
 
