@@ -3,7 +3,10 @@ using System.Buffers;
 using System.Buffers.Binary;
 using System.Buffers.Text;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace OpenAI.Embeddings;
 
@@ -110,7 +113,13 @@ public partial class OpenAIEmbedding
         ReadOnlySpan<byte> base64 = binaryData.ToMemory().Span;
 
         // Remove quotes around base64 string.
-        if (base64.Length < 2 || base64[0] != (byte)'"' || base64[base64.Length - 1] != (byte)'"')
+        if (base64.Length < 2
+            ||
+            (
+                !(base64[0] != (byte)'"' || base64[base64.Length - 1] != (byte)'"')
+                && !(base64[0] != (byte)'[' || base64[base64.Length - 1] != (byte)']')
+             )
+            )
         {
             ThrowInvalidData();
         }
@@ -124,6 +133,21 @@ public partial class OpenAIEmbedding
             OperationStatus status = Base64.DecodeFromUtf8(base64, bytes.AsSpan(), out int bytesConsumed, out int bytesWritten);
             if (status != OperationStatus.Done || bytesWritten % sizeof(float) != 0)
             {
+            //try to deserialize as floats
+            try
+            {
+                var s = binaryData.ToString();
+                s = s.Substring(1, s.Length - 2);
+                var floats = s.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                var floatb = floats.Select(f => float.Parse(f, CultureInfo.InvariantCulture)).ToArray();
+                return new ReadOnlyMemory<float>(floatb);
+            }
+            catch
+            {
+                //this is not an array of floats too
+                //unknown answer
+            }
+
                 ThrowInvalidData();
             }
 
