@@ -164,9 +164,12 @@ namespace OpenAI.Chat
                 if (prop.NameEquals("choices"u8))
                 {
                     List<InternalCreateChatCompletionStreamResponseChoice> array = new List<InternalCreateChatCompletionStreamResponseChoice>();
-                    foreach (var item in prop.Value.EnumerateArray())
+                    if (prop.Value.ValueKind != JsonValueKind.Null)
                     {
-                        array.Add(InternalCreateChatCompletionStreamResponseChoice.DeserializeInternalCreateChatCompletionStreamResponseChoice(item, options));
+                        foreach (var item in prop.Value.EnumerateArray())
+                        {
+                            array.Add(InternalCreateChatCompletionStreamResponseChoice.DeserializeInternalCreateChatCompletionStreamResponseChoice(item, options));
+                        }
                     }
                     choices = array;
                     continue;
